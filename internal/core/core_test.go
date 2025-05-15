@@ -3,7 +3,6 @@ package core_test
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -95,9 +94,9 @@ func TestNewMigrateCore_CreateGoTemplate(t *testing.T) {
 	tmpDir := createTempDir(t)
 	defer os.RemoveAll(tmpDir)
 
-	config := createConfig(t, tmpDir)
-	config.Format = config.FormatGolang
-	migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, config)
+	cfg := createConfig(t, tmpDir)
+	cfg.Format = config.FormatGolang
+	migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, cfg)
 
 	err := migrateCore.CreateMigrationFile("test empty migration", 4)
 	assert.NoError(t, err)
@@ -118,7 +117,7 @@ func TestNewMigrateCore_CreateGoTemplate(t *testing.T) {
 
 func TestMigrateCore_LoadMigrations(t *testing.T) {
 	zLogger := zaptest.NewLogger(t)
-	config := createConfig(t, defaultMigratePath)
+	cfg := createConfig(t, defaultMigratePath)
 	mockCommand := command.MockCommand{}
 
 	dbMigrations := map[uint64]domain.Migration{
@@ -146,21 +145,21 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 			format:                config.FormatSQL,
 			giveRequestToVersion:  0,
 			giveDirection:         migrate.MigrationUp,
-			expectedRawMigrations: test.RawSQLMigrations(config, migrate.MigrationUp)[2:],
+			expectedRawMigrations: test.RawSQLMigrations(cfg, migrate.MigrationUp)[2:],
 		},
 		{
 			name:                  "load all DOWN sql-file",
 			format:                config.FormatSQL,
 			giveRequestToVersion:  0,
 			giveDirection:         migrate.MigrationDown,
-			expectedRawMigrations: test.RawSQLMigrations(config, migrate.MigrationDown)[3:],
+			expectedRawMigrations: test.RawSQLMigrations(cfg, migrate.MigrationDown)[3:],
 		},
 		{
 			name:                  "checking sql-file loading inclusively up to version",
 			format:                config.FormatSQL,
 			giveRequestToVersion:  3,
 			giveDirection:         migrate.MigrationUp,
-			expectedRawMigrations: test.RawSQLMigrations(config, migrate.MigrationUp)[2:3],
+			expectedRawMigrations: test.RawSQLMigrations(cfg, migrate.MigrationUp)[2:3],
 		},
 		//go migration
 		{
@@ -168,22 +167,22 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 			format:                config.FormatGolang,
 			giveRequestToVersion:  0,
 			giveDirection:         migrate.MigrationUp,
-			expectedRawMigrations: test.RawGoMigrations(config, migrate.MigrationUp)[2:],
+			expectedRawMigrations: test.RawGoMigrations(cfg, migrate.MigrationUp)[2:],
 		},
 		{
 			name:                  "checking go-file loading inclusively up to version",
 			format:                config.FormatGolang,
 			giveRequestToVersion:  3,
 			giveDirection:         migrate.MigrationUp,
-			expectedRawMigrations: test.RawGoMigrations(config, migrate.MigrationUp)[2:3],
+			expectedRawMigrations: test.RawGoMigrations(cfg, migrate.MigrationUp)[2:3],
 		},
 	}
 
-	migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, config)
+	migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, cfg)
 
 	for _, tCase := range tCases {
 		t.Run(tCase.name, func(t *testing.T) {
-			config.Format = tCase.format
+			cfg.Format = tCase.format
 			rawMigrations, err := migrateCore.LoadMigrations(context.Background(), tCase.giveRequestToVersion, tCase.giveDirection)
 
 			assert.NoError(t, err)
@@ -194,8 +193,8 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 
 func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 	zLogger := zaptest.NewLogger(t)
-	config := createConfig(t, defaultMigratePath)
-	config.Format = config.FormatGolang
+	cfg := createConfig(t, defaultMigratePath)
+	cfg.Format = config.FormatGolang
 	mockStorage := storage.MockMigrateStorage{}
 
 	tCases := []struct {
@@ -208,7 +207,7 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 	}{
 		{
 			name:                 "migration up",
-			giveNeededMigrations: test.RawGoMigrations(config, migrate.MigrationUp),
+			giveNeededMigrations: test.RawGoMigrations(cfg, migrate.MigrationUp),
 			giveDirection:        migrate.MigrationUp,
 
 			expectedFiles: []string{
@@ -224,7 +223,7 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 		},
 		{
 			name:                 "migration down",
-			giveNeededMigrations: test.RawGoMigrations(config, migrate.MigrationDown)[1:],
+			giveNeededMigrations: test.RawGoMigrations(cfg, migrate.MigrationDown)[1:],
 			giveDirection:        migrate.MigrationDown,
 
 			expectedFiles: []string{
@@ -239,7 +238,7 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 		},
 		{
 			name:                 "migration error",
-			giveNeededMigrations: test.RawGoMigrations(config, migrate.MigrationUp)[0:1],
+			giveNeededMigrations: test.RawGoMigrations(cfg, migrate.MigrationUp)[0:1],
 			giveDirection:        migrate.MigrationUp,
 
 			expectedFiles: []string{
@@ -285,7 +284,7 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 							if expectedFile == "3_test_create_third_table.go" {
 								expectedFile = "subfolder/3_test_create_third_table.go"
 							}
-							originalFile := filepath.Join(config.Path, expectedFile)
+							originalFile := filepath.Join(cfg.Path, expectedFile)
 							if !assert.FileExists(t, originalFile) {
 								t.Fatalf("original file not found %s", expectedFile)
 							}
@@ -295,7 +294,7 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 					}
 				}).Return(returnErr)
 
-			migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, config)
+			migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, cfg)
 			count, err := migrateCore.StartMigrate(context.Background(), tCase.giveNeededMigrations, tCase.giveDirection)
 			if tCase.expectedErr == nil {
 				assert.NoError(t, err)
@@ -310,8 +309,8 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 
 func TestMigrateCore_StartMigrate_FormatSQL(t *testing.T) {
 	zLogger := zaptest.NewLogger(t)
-	config := createConfig(t, defaultMigratePath)
-	config.Format = config.FormatSQL
+	cfg := createConfig(t, defaultMigratePath)
+	cfg.Format = config.FormatSQL
 	mockCommand := command.MockCommand{}
 
 	tCases := []struct {
@@ -322,13 +321,13 @@ func TestMigrateCore_StartMigrate_FormatSQL(t *testing.T) {
 	}{
 		{
 			name:                 "",
-			giveNeededMigrations: test.RawSQLMigrations(config, migrate.MigrationUp),
+			giveNeededMigrations: test.RawSQLMigrations(cfg, migrate.MigrationUp),
 			giveDirection:        migrate.MigrationUp,
 			expectedCount:        4,
 		},
 		{
 			name:                 "",
-			giveNeededMigrations: test.RawSQLMigrations(config, migrate.MigrationDown),
+			giveNeededMigrations: test.RawSQLMigrations(cfg, migrate.MigrationDown),
 			giveDirection:        migrate.MigrationDown,
 			expectedCount:        5,
 		},
@@ -375,7 +374,7 @@ func TestMigrateCore_StartMigrate_FormatSQL(t *testing.T) {
 					}
 				}).Return(&mockTx, nil)
 
-			migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, config)
+			migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, cfg)
 			count, err := migrateCore.StartMigrate(context.Background(), tCase.giveNeededMigrations, tCase.giveDirection)
 			assert.NoError(t, err)
 			assert.Equal(t, tCase.expectedCount, count)
@@ -397,7 +396,7 @@ func fileGetContents(t *testing.T, pathFile string) []byte {
 }
 
 func createTempDir(t *testing.T) string {
-	tmpPath, err := ioutil.TempDir(os.TempDir(), "test_migrator_*")
+	tmpPath, err := os.MkdirTemp(os.TempDir(), "test_migrator_*")
 	assert.NoError(t, err)
 
 	return tmpPath
