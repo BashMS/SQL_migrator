@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -192,7 +191,7 @@ func (l *Loader) parseFile(path string) (RawMigration, error) {
 		migration.PathUp = path
 		migration.PathDown = path
 	case config.FormatSQL:
-		query, err := ioutil.ReadFile(path)
+		query, err := os.ReadFile(path)
 		if err != nil {
 			return migration, fmt.Errorf("%w %s", ErrReadFile, path)
 		}

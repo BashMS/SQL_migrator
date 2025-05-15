@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -43,7 +42,7 @@ func main() {
 
 func handle(templatePath, outputDir string) error {
 	samplePath := filepath.Join(templatePath, fileSample)
-	sampleContent, err := ioutil.ReadFile(samplePath)
+	sampleContent, err := os.ReadFile(samplePath)
 	if err != nil {
 		return err
 	}
@@ -60,7 +59,7 @@ func handle(templatePath, outputDir string) error {
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(path)
+		content, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("failed to read file contents (%s): %w", path, err)
 		}

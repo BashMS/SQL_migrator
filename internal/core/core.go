@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
-	//"strings"
 
 	"github.com/coreos/etcd/pkg/fileutil"
 	"github.com/iancoleman/strcase"
@@ -280,7 +278,7 @@ func (mc *MigrateCore) runGoMigration(
 	direction bool,
 ) (int, error) {
 	mc.logger.Info("build a program for migrations...")
-	tmpPath, err := ioutil.TempDir(os.TempDir(), "migrator_*")
+	tmpPath, err := os.MkdirTemp(os.TempDir(), "migrator_*")
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
 	}
