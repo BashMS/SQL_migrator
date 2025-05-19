@@ -225,3 +225,51 @@ func (_m *MockTx) SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults 
 
 	return r0
 }
+
+// BeginFunc provides a mock function with given fields: ctx, f
+func (_m *MockTx) BeginFunc(ctx context.Context, f func(pgx.Tx) error) error {
+	ret := _m.Called(ctx, f)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BeginFunc")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, func(pgx.Tx) error) error); ok {
+		r0 = rf(ctx, f)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// QueryFunc provides a mock function with given fields: ctx, sql, args, scans, f
+func (_m *MockTx) QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error) {
+	ret := _m.Called(ctx, sql, args, scans, f)
+
+	if len(ret) == 0 {
+		panic("no return value specified for QueryFunc")
+	}
+
+	var r0 pgconn.CommandTag
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []interface{}, []interface{}, func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error)); ok {
+		return rf(ctx, sql, args, scans, f)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, []interface{}, []interface{}, func(pgx.QueryFuncRow) error) pgconn.CommandTag); ok {
+		r0 = rf(ctx, sql, args, scans, f)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(pgconn.CommandTag)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, []interface{}, []interface{}, func(pgx.QueryFuncRow) error) error); ok {
+		r1 = rf(ctx, sql, args, scans, f)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

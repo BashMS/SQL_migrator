@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/coreos/etcd/pkg/fileutil"
 	"github.com/iancoleman/strcase"
@@ -285,7 +286,8 @@ func (mc *MigrateCore) runGoMigration(
 	defer os.RemoveAll(tmpPath)
 
 	for _, rawMigration := range rawMigrations {
-		base := path.Base(rawMigration.GetPath(direction))
+		base := strings.ReplaceAll(rawMigration.GetPath(direction),`\\`, `\`)
+		base = path.Base(strings.ReplaceAll(base, `\`, `/`))
 		if err := util.CopyFile(filepath.Join(tmpPath, base), rawMigration.GetPath(direction)); err != nil {
 			return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
 		}

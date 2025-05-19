@@ -50,8 +50,8 @@ func RawSQLMigrations(cfg *config.Config, direction bool) []loader.RawMigration 
 			{
 				Version:   3,
 				Name:      "testCreateThirdTable",
-				PathUp:    filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.up.sql"),
-				PathDown:  filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.down.sql"),
+				PathUp:    filepath.Join(cfg.Path, "third_table/3_test_create_third_table.up.sql"),
+				PathDown:  filepath.Join(cfg.Path, "third_table/3_test_create_third_table.down.sql"),
 				Format:    config.FormatSQL,
 				QueryUp:   `CREATE TABLE IF NOT EXISTS "test_third_table"();`,
 				QueryDown: `DROP TABLE IF EXISTS "test_third_table";`,
@@ -99,8 +99,8 @@ func RawSQLMigrations(cfg *config.Config, direction bool) []loader.RawMigration 
 		{
 			Version:   3,
 			Name:      "testCreateThirdTable",
-			PathUp:    filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.up.sql"),
-			PathDown:  filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.down.sql"),
+			PathUp:    filepath.Join(cfg.Path, "third_table/3_test_create_third_table.up.sql"),
+			PathDown:  filepath.Join(cfg.Path, "third_table/3_test_create_third_table.down.sql"),
 			Format:    config.FormatSQL,
 			QueryUp:   `CREATE TABLE IF NOT EXISTS "test_third_table"();`,
 			QueryDown: `DROP TABLE IF EXISTS "test_third_table";`,
@@ -146,8 +146,8 @@ func RawGoMigrations(cfg *config.Config, direction bool) []loader.RawMigration {
 			{
 				Version:  3,
 				Name:     "testCreateThirdTable",
-				PathUp:   filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.go"),
-				PathDown: filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.go"),
+				PathUp:   filepath.Join(cfg.Path, "third_table/3_test_create_third_table.go"),
+				PathDown: filepath.Join(cfg.Path, "third_table/3_test_create_third_table.go"),
 				Format:   config.FormatGolang,
 			},
 			{
@@ -185,8 +185,8 @@ func RawGoMigrations(cfg *config.Config, direction bool) []loader.RawMigration {
 		{
 			Version:  3,
 			Name:     "testCreateThirdTable",
-			PathUp:   filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.go"),
-			PathDown: filepath.Join(cfg.Path, "subfolder/3_test_create_third_table.go"),
+			PathUp:   filepath.Join(cfg.Path, "third_table/3_test_create_third_table.go"),
+			PathDown: filepath.Join(cfg.Path, "third_table/3_test_create_third_table.go"),
 			Format:   config.FormatGolang,
 		},
 		{

@@ -282,7 +282,7 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 
 						if expectedFile != "main.go" {
 							if expectedFile == "3_test_create_third_table.go" {
-								expectedFile = "subfolder/3_test_create_third_table.go"
+								expectedFile = "third_table/3_test_create_third_table.go"
 							}
 							originalFile := filepath.Join(cfg.Path, expectedFile)
 							if !assert.FileExists(t, originalFile) {
@@ -387,7 +387,7 @@ func assertCompareFiles(t *testing.T, originalFile, newFile string) {
 }
 
 func fileGetContents(t *testing.T, pathFile string) []byte {
-	data, err := ioutil.ReadFile(pathFile)
+	data, err := os.ReadFile(pathFile)
 	if !assert.NoError(t, err) {
 		return []byte{}
 	}
