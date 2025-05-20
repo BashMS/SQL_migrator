@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  integration-tests:
+    build: .
+    command: ["go", "test", "./test/integration", "-tags", "integration"]
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    restart: always
+    logging:
+      driver: "none"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: migration
+    ports:
+      - "5432:5432"
