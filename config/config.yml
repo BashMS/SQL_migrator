@@ -1,0 +1,17 @@
+migrator:
+  # строка подключения к базе данных (Data Source Name или DSN)
+  # смотрите пример https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
+  # для получения дополнительной информации о параметрах строки подключения
+  dsn: "postgres://postgres:postgres@db:5432/migration?sslmode=disable"
+
+  # абсолютный путь к папке с миграциями
+  path: "./test/data"
+
+  # формат миграций ("sql", "golang")
+  format: "golang"
+
+  log:
+    # абсолютный путь к папке с логами
+    path: "/tmp/logs/migrator.log"
+    # уровень логирования ("debug", "info", "warn", "error" and "fatal")
+    level: "info"

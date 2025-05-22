@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS "test_third_table";

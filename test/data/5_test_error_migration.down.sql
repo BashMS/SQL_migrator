@@ -1,0 +1,1 @@
+SELECT Bad_Migratiom FORM MORF;
