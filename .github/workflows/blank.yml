@@ -43,6 +43,9 @@ jobs:
       - name: Extract branch name
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
+      - name: branch name 
+        run: echo "env.BRANCH=" >> ${{ env.BRANCH }}
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -53,7 +56,7 @@ jobs:
 
       - name: Unit tests
         run: go test -v ./...
-        working-directory: ${{ "01_init" }}
+        working-directory: ${{ env.BRANCH }}
   tests_by_makefile:
     runs-on: ubuntu-latest
     steps:
