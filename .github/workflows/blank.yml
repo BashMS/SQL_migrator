@@ -53,7 +53,7 @@ jobs:
 
       - name: Unit tests
         run: go test -v ./...
-        working-directory: ${{ 01_init }}
+        working-directory: ${{ "01_init" }}
   tests_by_makefile:
     runs-on: ubuntu-latest
     steps:
