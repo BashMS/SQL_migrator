@@ -6,28 +6,28 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4" //nolint:depguard
 
-	"github.com/BashMS/SQL_migrator/internal/command"
-	"github.com/BashMS/SQL_migrator/internal/core"
-	"github.com/BashMS/SQL_migrator/internal/storage"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
-	"github.com/BashMS/SQL_migrator/pkg/logger"
-	"go.uber.org/zap"
+	"github.com/BashMS/SQL_migrator/internal/command" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/core"    //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/storage" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/config"       //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"       //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/logger"       //nolint:depguard
+	"go.uber.org/zap"                                 //nolint:depguard
 )
 
 const (
-	//MigrationUp - накат миграции.
+	// MigrationUp - накат миграции.
 	MigrationUp = true
-	//MigrationDown откат миграции.
+	// MigrationDown откат миграции.
 	MigrationDown = false
 )
 
-//CustomMigrateFunc - пользовательская функция для миграций.
+// CustomMigrateFunc - пользовательская функция для миграций.
 type CustomMigrateFunc func(ctx context.Context, tx pgx.Tx) error
 
-//Migrate.
+// Migrate.
 type Migrate interface {
 	Create(name string) error
 	Status(ctx context.Context) ([]domain.Migration, error)
@@ -46,7 +46,7 @@ type migrate struct {
 	config      *config.Config
 }
 
-//NewMigrate конструктор.
+// NewMigrate конструктор.
 func NewMigrate(zLogger *zap.Logger, config *config.Config) Migrate {
 	migrateStorage := storage.NewStorage(zLogger, config)
 	return &migrate{
@@ -56,15 +56,15 @@ func NewMigrate(zLogger *zap.Logger, config *config.Config) Migrate {
 	}
 }
 
-//Create создать файл миграции.
-//Создает файлы миграции с установленной версией (с меткой времени) и именем в каталоге
+// Create создать файл миграции.
+// Создает файлы миграции с установленной версией (с меткой времени) и именем в каталоге.
 func (m *migrate) Create(name string) error {
-	version := uint64(time.Now().Unix())
+	version := uint64(time.Now().Unix()) //nolint:gosec
 	return m.migrateCore.CreateMigrationFile(name, version)
 }
 
-//Up - применить все или N миграций вверх
-//Применяет все миграции с момента последней примененной миграции.
+// Up - применить все или N миграций вверх.
+// Применяет все миграции с момента последней примененной миграции.
 func (m *migrate) Up(ctx context.Context, requestToVersion uint64) (int, error) {
 	closeFunc, err := m.migrateCore.ConnectDB(ctx)
 	if err != nil {
@@ -84,8 +84,8 @@ func (m *migrate) Up(ctx context.Context, requestToVersion uint64) (int, error) 
 	return m.migrateCore.StartMigrate(ctx, neededMigrations, MigrationUp)
 }
 
-//Down - откатить все миграции
-//Откатить все миграции с момента последней примененной миграции.
+// Down - откатить все миграции.
+// Откатить все миграции с момента последней примененной миграции.
 func (m *migrate) DownAll(ctx context.Context) (int, error) {
 	closeFunc, err := m.migrateCore.ConnectDB(ctx)
 	if err != nil {
@@ -93,7 +93,7 @@ func (m *migrate) DownAll(ctx context.Context) (int, error) {
 	}
 	defer closeFunc()
 
-    neededMigrations, err := m.migrateCore.LoadMigrations(ctx, 0, MigrationDown)
+	neededMigrations, err := m.migrateCore.LoadMigrations(ctx, 0, MigrationDown)
 	if err != nil {
 		return 0, err
 	}
@@ -105,7 +105,7 @@ func (m *migrate) DownAll(ctx context.Context) (int, error) {
 	return m.migrateCore.StartMigrate(ctx, neededMigrations, MigrationDown)
 }
 
-// Down - откат одной или N миграций вниз
+// Down - откат одной или N миграций вниз.
 // Откат одной миграции с момента последней примененной миграции.
 func (m *migrate) Down(ctx context.Context, requestToVersion uint64) (int, error) {
 	closeFunc, err := m.migrateCore.ConnectDB(ctx)
@@ -134,7 +134,7 @@ func (m *migrate) Down(ctx context.Context, requestToVersion uint64) (int, error
 	return m.migrateCore.StartMigrate(ctx, neededMigrations, MigrationDown)
 }
 
-//Redo - откатывает последнюю примененную миграцию и накатывает ее снова.
+// Redo - откатывает последнюю примененную миграцию и накатывает ее снова.
 func (m *migrate) Redo(ctx context.Context) (*domain.Migration, error) {
 	closeFunc, err := m.migrateCore.ConnectDB(ctx)
 	if err != nil {
@@ -176,7 +176,7 @@ func (m *migrate) Redo(ctx context.Context) (*domain.Migration, error) {
 	return migration, nil
 }
 
-//MigrateVersion возвращает информацию о последней выведенной версии.
+// MigrateVersion возвращает информацию о последней выведенной версии.
 func (m *migrate) MigrateVersion(ctx context.Context) (*domain.Migration, error) {
 	closeFunc, err := m.migrateCore.ConnectDB(ctx)
 	if err != nil {
@@ -192,8 +192,8 @@ func (m *migrate) MigrateVersion(ctx context.Context) (*domain.Migration, error)
 	return migration, err
 }
 
-//Status - возвращаемый статус всех миграций.
-//Данные берутся из таблицы миграций
+// Status - возвращаемый статус всех миграций.
+// Данные берутся из таблицы миграций.
 func (m *migrate) Status(ctx context.Context) ([]domain.Migration, error) {
 	closeFunc, err := m.migrateCore.ConnectDB(ctx)
 	if err != nil {
@@ -204,8 +204,7 @@ func (m *migrate) Status(ctx context.Context) ([]domain.Migration, error) {
 	return m.migrateCore.GetMigrations(ctx)
 }
 
-//RunMigrationWithCustomFunc - запускает миграцию с помощью пользовательской функции
-//!!внимание не использует блокировки миграции; согласованность базы данных может быть нарушена!!
+// RunMigrationWithCustomFunc - запускает миграцию с помощью пользовательской функции.
 func (m *migrate) RunMigrationWithCustomFunc(
 	ctx context.Context,
 	migrateFunc CustomMigrateFunc,

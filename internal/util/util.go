@@ -27,17 +27,17 @@ func CopyFile(dest, src string) error {
 	}
 	source, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("%w: %s (%s)", ErrCopyFile, err, src)
+		return fmt.Errorf("%w: %s (%s)", ErrCopyFile, err.Error(), src)
 	}
 	defer source.Close()
 	destination, err := os.Create(dest)
 	if err != nil {
-		return fmt.Errorf("%w: %s (%s)", ErrCopyFile, err, src)
+		return fmt.Errorf("%w: %s (%s)", ErrCopyFile, err.Error(), src)
 	}
 	defer destination.Close()
 	ioBytes, err := io.Copy(destination, source)
 	if err != nil {
-		return fmt.Errorf("%w: %s (%s)", ErrCopyFile, err, src)
+		return fmt.Errorf("%w: %s (%s)", ErrCopyFile, err.Error(), src)
 	}
 	if ioBytes == 0 {
 		return fmt.Errorf("%w: copied 0 bytes (%s)", ErrCopyFile, src)
@@ -50,7 +50,7 @@ func CopyFile(dest, src string) error {
 func CreateFile(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("%w: %s (%s)", ErrCreateFile, err, path)
+		return fmt.Errorf("%w: %s (%s)", ErrCreateFile, err.Error(), path)
 	}
 	defer f.Close()
 

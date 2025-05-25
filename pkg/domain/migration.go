@@ -4,10 +4,10 @@ import (
 	"time"
 )
 
-//Migration.
+// Migration.
 type Migration struct {
 	Version   uint64    `json:"version"`
 	Name      string    `json:"name"`
-	IsApplied bool      `json:"is_applied"`
-	UpdateAt  time.Time `json:"update_at"`
+	IsApplied bool      `json:"isApplied"`
+	UpdateAt  time.Time `json:"updateAt"`
 }

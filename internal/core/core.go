@@ -9,24 +9,22 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/iancoleman/strcase"
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgx/v4"
-	"go.uber.org/zap"
+	"github.com/coreos/etcd/pkg/fileutil" //nolint:depguard
+	"github.com/iancoleman/strcase"       //nolint:depguard
+	"github.com/jackc/pgconn"             //nolint:depguard
+	"github.com/jackc/pgx/v4"             //nolint:depguard
+	"go.uber.org/zap"                     //nolint:depguard
 
-	"github.com/BashMS/SQL_migrator/internal/command"
-	"github.com/BashMS/SQL_migrator/internal/converter"
-	"github.com/BashMS/SQL_migrator/internal/loader"
-	"github.com/BashMS/SQL_migrator/internal/storage"
-	"github.com/BashMS/SQL_migrator/internal/template"
-	"github.com/BashMS/SQL_migrator/internal/util"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
-	"github.com/BashMS/SQL_migrator/pkg/logger"
+	"github.com/BashMS/SQL_migrator/internal/command"   //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/converter" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/loader"    //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/storage"   //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/template"  //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/util"      //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/config"         //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"         //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/logger"         //nolint:depguard
 )
-
-const uidName = "migrator"
 
 type (
 	DeferFunc func()
@@ -61,7 +59,7 @@ func NewMigrateCore(
 // ConnectDB - соединение с БД.
 func (mc *MigrateCore) ConnectDB(ctx context.Context) (DeferFunc, error) {
 	if err := mc.storage.Connect(ctx); err != nil {
-		return nil, fmt.Errorf("%w: %s", domain.ErrConnection, err)
+		return nil, fmt.Errorf("%w: %s", domain.ErrConnection, err.Error())
 	}
 
 	return mc.storage.Close, nil
@@ -79,7 +77,7 @@ func (mc *MigrateCore) LoadMigrations(
 	mc.loader.SetFormat(mc.config.Format)
 	excludeMigrations, err := mc.storage.GetMigrationsByDirection(ctx, direction)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", domain.ErrLoadMigrations, err)
+		return nil, fmt.Errorf("%w: %s", domain.ErrLoadMigrations, err.Error())
 	}
 
 	filter := loader.Filter{Exclude: excludeMigrations}
@@ -87,18 +85,18 @@ func (mc *MigrateCore) LoadMigrations(
 		filter.RequestToVersion = requestToVersion
 	} else {
 		filter.Recent, err = mc.storage.RecentMigration(ctx)
-		if err != nil && err != pgx.ErrNoRows {
-			return nil, fmt.Errorf("%w: %s", domain.ErrGetRecentMigration, err)
+		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %s", domain.ErrGetRecentMigration, err.Error())
 		}
 		// Если миграций нет и текущая — MigrationDown,
-        // то считаем, что все миграции откатываются.
+		// то считаем, что все миграции откатываются.
 		if filter.Recent.Version == 0 && !direction {
 			return nil, nil
 		}
 	}
 	neededMigrations, err := mc.loader.LoadMigrations(ctx, filter, mc.config.Path, direction)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", domain.ErrLoadMigrations, err)
+		return nil, fmt.Errorf("%w: %s", domain.ErrLoadMigrations, err.Error())
 	}
 
 	return neededMigrations, nil
@@ -126,7 +124,7 @@ func (mc *MigrateCore) StartMigrate(
 // GetRecentMigration - возвращает последнюю примененную миграцию.
 func (mc *MigrateCore) GetRecentMigration(ctx context.Context) (*domain.Migration, error) {
 	migration, err := mc.storage.RecentMigration(ctx)
-	if err != nil && err == pgx.ErrNoRows {
+	if err != nil && errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
@@ -233,7 +231,7 @@ func (mc *MigrateCore) runSQLMigration(
 	for _, rawMigration := range rawMigrations {
 		query := rawMigration.GetQuery(direction)
 
-		//skip empty up-migration
+		// skip empty up-migration
 		if query == "" && direction {
 			mc.logger.Warn(fmt.Sprintf("%s empty migration file detected, it will be skipped",
 				rawMigration.GetPath(direction)))
@@ -262,7 +260,6 @@ func (mc *MigrateCore) runSQLMigration(
 
 		var rowAffected int64
 		rowAffected, err = mc.exec(ctx, tx, query)
-
 		if err != nil {
 			return count, err
 		}
@@ -281,35 +278,39 @@ func (mc *MigrateCore) runGoMigration(
 	mc.logger.Info("build a program for migrations...")
 	tmpPath, err := os.MkdirTemp(os.TempDir(), "migrator_*")
 	if err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
+		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err.Error())
 	}
 	defer os.RemoveAll(tmpPath)
 
 	for _, rawMigration := range rawMigrations {
-		base := strings.ReplaceAll(rawMigration.GetPath(direction),`\\`, `\`)
+		base := strings.ReplaceAll(rawMigration.GetPath(direction), `\\`, `\`)
 		base = path.Base(strings.ReplaceAll(base, `\`, `/`))
 		if err := util.CopyFile(filepath.Join(tmpPath, base), rawMigration.GetPath(direction)); err != nil {
-			return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
+			return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err.Error())
 		}
 	}
 
-	if err := template.CreateMainSample(filepath.Join(tmpPath, "main.go"), mc.config, rawMigrations, direction); err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
+	if err := template.CreateMainSample(
+		filepath.Join(tmpPath, "main.go"),
+		mc.config,
+		rawMigrations,
+		direction); err != nil {
+		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err.Error())
 	}
 
 	var env command.Env
 	if err := mc.command.Run(ctx, "go", command.Args{"mod", "init", "go/migration"}, tmpPath, env); err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
+		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err.Error())
 	}
 
 	if err := mc.command.Run(ctx, "go", command.Args{"mod", "tidy"}, tmpPath, env); err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err)
+		return 0, fmt.Errorf("%w: %s", domain.ErrBuildProgramForMigrations, err.Error())
 	}
 	env = append(env, os.Environ()...)
 	env = append(env, "GO111MODULE=on")
 	mc.logger.Info("starting a program for migrations...")
 	if err := mc.command.RunWithGracefulShutdown(ctx, "go", command.Args{"run", "./..."}, tmpPath, env); err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrStartingProgramForMigrations, err)
+		return 0, fmt.Errorf("%w: %s", domain.ErrStartingProgramForMigrations, err.Error())
 	}
 
 	return len(rawMigrations), nil
@@ -322,36 +323,16 @@ func (mc *MigrateCore) exec(ctx context.Context, tx pgx.Tx, query string, args .
 	)
 
 	result, err = tx.Exec(ctx, query, args...)
-
 	if err != nil {
 		if errRollback := tx.Rollback(ctx); errRollback != nil {
-			return 0, fmt.Errorf("%w: %s: %s", domain.ErrTransactionCancel, domain.ErrApplyingMigration, errRollback)
+			return 0, fmt.Errorf("%w: %w: %w", domain.ErrTransactionCancel, domain.ErrApplyingMigration, errRollback)
 		}
 
-		return 0, fmt.Errorf("%w: %s", domain.ErrApplyingMigration, err)
+		return 0, fmt.Errorf("%w: %s", domain.ErrApplyingMigration, err.Error())
 	}
 
 	if errCommit := tx.Commit(ctx); errCommit != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrApplyingMigration, errCommit)
-	}
-
-	return result.RowsAffected(), nil
-}
-
-func (mc *MigrateCore) execWithoutTransaction(ctx context.Context, query string, args ...interface{}) (int64, error) {
-	var (
-		err    error
-		result pgconn.CommandTag
-	)
-
-	var conn *pgx.Conn
-	mc.storage.Close()
-	if conn, err = mc.storage.GetConnection(ctx); err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrApplyingMigration, err)
-	}
-
-	if result, err = conn.Exec(ctx, query, args...); err != nil {
-		return 0, fmt.Errorf("%w: %s", domain.ErrApplyingMigration, err)
+		return 0, fmt.Errorf("%w: %s", domain.ErrApplyingMigration, errCommit.Error())
 	}
 
 	return result.RowsAffected(), nil

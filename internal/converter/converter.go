@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/BashMS/SQL_migrator/pkg/config"
+	"github.com/BashMS/SQL_migrator/pkg/config" //nolint:depguard
 )
 
 // SanitizeMigrationName - очищает имя миграции, удаляя или заменяя лишние символы.

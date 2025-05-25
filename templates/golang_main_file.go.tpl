@@ -46,7 +46,7 @@ func main() {
 {{$prefix := "Down"}}
 {{if .Direction}} {{$prefix = "Up"}} {{end}}
 {{range $k, $migration := .Migrations}}
-{{$FN := printf "%s_%d_%s" $prefix $migration.Version $migration.Name}}
+{{$FN := printf "%s%d%s" $prefix $migration.Version $migration.Name}}
     migrationFuncs = append(migrationFuncs, customFunc{
         migrateFunc: {{$FN}},
         name:        "{{$migration.Name}}",

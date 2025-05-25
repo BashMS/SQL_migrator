@@ -6,13 +6,13 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/BashMS/SQL_migrator/internal/loader"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
+	"github.com/BashMS/SQL_migrator/internal/loader" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/config"      //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"      //nolint:depguard
 )
 
 type (
-	//Sample struct.
+	// Sample struct.
 	Sample struct {
 		Name string
 		Text string

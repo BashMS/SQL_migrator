@@ -3,9 +3,9 @@ package report
 import (
 	"fmt"
 
-	"github.com/alexeyco/simpletable"
-	"github.com/logrusorgru/aurora"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
+	"github.com/BashMS/SQL_migrator/pkg/domain" //nolint:depguard
+	"github.com/alexeyco/simpletable"           //nolint:depguard
+	"github.com/logrusorgru/aurora"             //nolint:depguard
 )
 
 // PrintMigrations - выводит таблицу всех перенесенных миграций.

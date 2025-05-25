@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/spf13/cobra"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/logger"
-	"github.com/BashMS/SQL_migrator/pkg/migrate"
-	"go.uber.org/zap"
+	"github.com/BashMS/SQL_migrator/pkg/config"  //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/logger"  //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/migrate" //nolint:depguard
+	"github.com/spf13/cobra"                     //nolint:depguard
+	"go.uber.org/zap"                            //nolint:depguard
 )
 
 const timeoutShutdown = 3 * time.Second
@@ -23,7 +23,7 @@ const AppVersion = "0.0.1"
 
 var (
 	configFile string
-	cfg     config.Config
+	cfg        config.Config
 )
 
 // rootCmd базовая команда при вызове без каких-либо подкоманд.
@@ -41,7 +41,7 @@ Capabilities:
 	* version - output current version of migration
 `,
 	Version: AppVersion,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 		if configFile != "" {
 			if err := cfg.ReadConfigFromFile(configFile); err != nil {
 				return err
@@ -52,7 +52,7 @@ Capabilities:
 		cfg.Apply()
 		return cfg.PathConversion()
 	},
-	Run: func(cmd *cobra.Command, args []string) {},
+	Run: func(_ *cobra.Command, _ []string) {},
 }
 
 func init() {
@@ -62,10 +62,17 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfg.Path, "path", "p", "", "absolute path to the migration folder")
 
 	flagFormat := "format"
-	rootCmd.PersistentFlags().StringVarP(&cfg.Format, flagFormat, "f", "", "format of migrations (\"sql\", \"golang\")")
-	err = rootCmd.RegisterFlagCompletionFunc(flagFormat, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{config.FormatSQL, config.FormatGolang}, cobra.ShellCompDirectiveDefault
-	})
+	rootCmd.PersistentFlags().StringVarP(
+		&cfg.Format,
+		flagFormat,
+		"f",
+		"",
+		"format of migrations (\"sql\", \"golang\")")
+	err = rootCmd.RegisterFlagCompletionFunc(
+		flagFormat,
+		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return []string{config.FormatSQL, config.FormatGolang}, cobra.ShellCompDirectiveDefault
+		})
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -74,16 +81,22 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfg.LogPath, "log-path", "", "absolute path to the log")
 
 	flagLogLevel := "log-level"
-	rootCmd.PersistentFlags().StringVar(&cfg.LogLevel, flagLogLevel, "", "logging level (\"debug\", \"info\", \"warn\", \"error\" and \"fatal\")")
-	err = rootCmd.RegisterFlagCompletionFunc(flagLogLevel, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{
-			config.LogLevelDebug,
-			config.LogLevelInfo,
-			config.LogLevelWarn,
-			config.LogLevelError,
-			config.LogLevelFatal,
-		}, cobra.ShellCompDirectiveDefault
-	})
+	rootCmd.PersistentFlags().StringVar(
+		&cfg.LogLevel,
+		flagLogLevel,
+		"",
+		"logging level (\"debug\", \"info\", \"warn\", \"error\" and \"fatal\")")
+	err = rootCmd.RegisterFlagCompletionFunc(
+		flagLogLevel,
+		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return []string{
+				config.LogLevelDebug,
+				config.LogLevelInfo,
+				config.LogLevelWarn,
+				config.LogLevelError,
+				config.LogLevelFatal,
+			}, cobra.ShellCompDirectiveDefault
+		})
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -128,9 +141,11 @@ func runMigrate(ctx context.Context, cancelFunc context.CancelFunc, migrateFunc 
 		consoleLogger.Error("program was interrupted by the user")
 		timer := time.NewTimer(timeoutShutdown)
 		<-timer.C
-		os.Exit(15)
+		logger.Flush(zLogger)
+		os.Exit(15) //nolint:gocritic
 	case err := <-chErr:
 		consoleLogger.Error(fmt.Sprintf("program terminated with an error: %s", err))
+		logger.Flush(zLogger)
 		os.Exit(1)
 	case <-ctx.Done():
 	}

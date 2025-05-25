@@ -9,12 +9,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/iancoleman/strcase"
-	"github.com/BashMS/SQL_migrator/internal/converter"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
-	"go.uber.org/zap"
+	"github.com/BashMS/SQL_migrator/internal/converter" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/config"         //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"         //nolint:depguard
+	"github.com/coreos/etcd/pkg/fileutil"               //nolint:depguard
+	"github.com/iancoleman/strcase"                     //nolint:depguard
+	"go.uber.org/zap"                                   //nolint:depguard
 )
 
 var (
@@ -62,7 +62,12 @@ func (l *Loader) SetFormat(format string) {
 }
 
 // LoadMigrations - загружает все миграции (с фильтром).
-func (l *Loader) LoadMigrations(ctx context.Context, filter Filter, path string, direction bool) ([]RawMigration, error) {
+func (l *Loader) LoadMigrations(
+	ctx context.Context,
+	filter Filter,
+	path string,
+	direction bool,
+) ([]RawMigration, error) {
 	l.resetMigrations()
 
 	if !fileutil.Exist(path) {
@@ -79,7 +84,7 @@ func (l *Loader) LoadMigrations(ctx context.Context, filter Filter, path string,
 		if err != nil {
 			return err
 		}
-		
+
 		if info.IsDir() {
 			return nil
 		}
@@ -229,13 +234,12 @@ func (l Loader) Len() int {
 
 // Swap меняет местами элементы с индексами i и j.
 func (l Loader) Swap(i, j int) {
-	l.listMigrations[i], l.listMigrations[j] = l.listMigrations[j], l.listMigrations[i]
 	l.hash[l.listMigrations[i].Version], l.hash[l.listMigrations[j].Version] =
 		l.hash[l.listMigrations[j].Version], l.hash[l.listMigrations[i].Version]
+	l.listMigrations[i], l.listMigrations[j] = l.listMigrations[j], l.listMigrations[i]
 }
 
 // Less сообщает, следует ли сортировать элемент с индексом i перед элементом с индексом j.
 func (l Loader) Less(i, j int) bool {
 	return l.listMigrations[i].Version < l.listMigrations[j].Version
 }
-

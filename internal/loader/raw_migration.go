@@ -1,6 +1,6 @@
 package loader
 
-//RawMigration.
+// RawMigration.
 type RawMigration struct {
 	Version   uint64
 	Name      string
@@ -11,7 +11,7 @@ type RawMigration struct {
 	QueryDown string
 }
 
-//GetPath - возвращает путь в зависимости от направления миграции.
+// GetPath - возвращает путь в зависимости от направления миграции.
 func (rm *RawMigration) GetPath(direction bool) string {
 	if direction {
 		return rm.PathUp
@@ -20,7 +20,7 @@ func (rm *RawMigration) GetPath(direction bool) string {
 	return rm.PathDown
 }
 
-//GetQuery - возвращает запрос в зависимости от направления.
+// GetQuery - возвращает запрос в зависимости от направления.
 func (rm *RawMigration) GetQuery(direction bool) string {
 	if direction {
 		return rm.QueryUp

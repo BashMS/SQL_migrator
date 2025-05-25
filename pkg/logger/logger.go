@@ -7,21 +7,21 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/logrusorgru/aurora"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"github.com/coreos/etcd/pkg/fileutil" //nolint:depguard
+	"github.com/logrusorgru/aurora"       //nolint:depguard
+	"go.uber.org/zap"                     //nolint:depguard
+	"go.uber.org/zap/zapcore"             //nolint:depguard
 
-	"github.com/BashMS/SQL_migrator/pkg/config"
+	"github.com/BashMS/SQL_migrator/pkg/config" //nolint:depguard
 )
 
-//ConsoleLogger - имя логгера в консоли.
+// ConsoleLogger - имя логгера в консоли.
 const ConsoleLogger = "migrate"
 
-//ErrMakeDir - не удалось создать каталог для логгов.
+// ErrMakeDir - не удалось создать каталог для логгов.
 var ErrMakeDir = errors.New("failed to create directory for logs")
 
-//New конструктор логгера.
+// New конструктор логгера.
 func New(config *config.Config) (*zap.Logger, error) {
 	var (
 		encodeConfig zapcore.EncoderConfig
@@ -33,7 +33,7 @@ func New(config *config.Config) (*zap.Logger, error) {
 	if len(config.LogPath) > 0 {
 		if !fileutil.Exist(config.LogPath) {
 			if err := makeLogPath(config.LogPath); err != nil {
-				return nil, fmt.Errorf("%w: %s", ErrMakeDir, err)
+				return nil, fmt.Errorf("%w: %s", ErrMakeDir, err.Error())
 			}
 		}
 		outputPaths = append(outputPaths, config.LogPath)
@@ -88,11 +88,11 @@ func consoleHook(entry zapcore.Entry) error {
 	return nil
 }
 
-//Flush - записывает логи на диск.
+// Flush - записывает логи на диск.
 func Flush(logger *zap.Logger) {
 	err := logger.Sync()
 	if err != nil {
-		pathError, ok := err.(*os.PathError)
+		pathError, ok := err.(*os.PathError) //nolint:errorlint
 		if ok && (pathError.Path == "/dev/stdout" || pathError.Path == "/dev/stderr") {
 			return
 		}

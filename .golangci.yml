@@ -31,6 +31,7 @@ issues:
         - dupl
         - gocyclo
         - gosec
+        - gci
 
 linters:
   disable-all: true
@@ -44,7 +45,6 @@ linters:
     - errorlint
     - exhaustive
     - funlen
-    - gci
     - gocognit
     - goconst
     - gocritic

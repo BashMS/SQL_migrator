@@ -1,8 +1,8 @@
 package loader
 
-import "github.com/BashMS/SQL_migrator/pkg/domain"
+import "github.com/BashMS/SQL_migrator/pkg/domain" //nolint:depguard
 
-//Filter.
+// Filter.
 type Filter struct {
 	Exclude          map[uint64]domain.Migration
 	Recent           domain.Migration

@@ -28,7 +28,7 @@ func NewCommand() Command {
 	return &command{}
 }
 
-//Run запуск с переменными.
+// Run запуск с переменными.
 func (c *command) Run(ctx context.Context, name string, args Args, dir string, env Env) error {
 	cmd := exec.CommandContext(ctx, name, args...)
 	if err := c.apply(cmd, dir, env).Run(); err != nil {

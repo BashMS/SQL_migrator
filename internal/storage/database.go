@@ -8,20 +8,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/log/zapadapter"
+	"github.com/jackc/pgconn"                //nolint:depguard
+	"github.com/jackc/pgx/v4"                //nolint:depguard
+	"github.com/jackc/pgx/v4/log/zapadapter" //nolint:depguard
 
-	"go.uber.org/zap"
+	"go.uber.org/zap" //nolint:depguard
 
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
+	"github.com/BashMS/SQL_migrator/pkg/config" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain" //nolint:depguard
 )
 
 const (
-	//MigrationsScheme - схема, где находится таблица миграция.
+	// MigrationsScheme - схема, где находится таблица миграция.
 	MigrationsScheme = "public"
-	//MigrationsTable - таблица миграции.
+	// MigrationsTable - таблица миграции.
 	MigrationsTable = "tmigration"
 
 	connTimeout  = 2 * time.Second
@@ -145,7 +145,11 @@ func (ps *postgresStorage) Close() {
 	ps.storage = nil
 }
 
-func (ps *postgresStorage) BeginTxMigration(ctx context.Context, migration domain.Migration, direction bool) (pgx.Tx, error) {
+func (ps *postgresStorage) BeginTxMigration(
+	ctx context.Context,
+	migration domain.Migration,
+	direction bool,
+) (pgx.Tx, error) {
 	if ps.isClosed() {
 		if err := ps.Connect(ctx); err != nil {
 			return nil, err
@@ -157,7 +161,7 @@ func (ps *postgresStorage) BeginTxMigration(ctx context.Context, migration domai
 
 	tx, err := ps.conn.Begin(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("%w, %s", errStartTransaction, err)
+		return nil, fmt.Errorf("%w, %s", errStartTransaction, err.Error())
 	}
 
 	query := `
@@ -184,7 +188,7 @@ func (ps *postgresStorage) BeginTxMigration(ctx context.Context, migration domai
 			return nil, ErrQueryDeadlineExceeded
 		}
 
-		return nil, fmt.Errorf("%w: %s", errBeginMigration, err)
+		return nil, fmt.Errorf("%w: %s", errBeginMigration, err.Error())
 	}
 	if tag.RowsAffected() == 0 {
 		return nil, ErrQueryNoAffectRows
@@ -218,7 +222,10 @@ func (ps *postgresStorage) RecentMigration(ctx context.Context) (domain.Migratio
 	return migration, nil
 }
 
-func (ps *postgresStorage) GetMigrationsByDirection(ctx context.Context, isApplied bool) (map[uint64]domain.Migration, error) {
+func (ps *postgresStorage) GetMigrationsByDirection(
+	ctx context.Context,
+	isApplied bool,
+) (map[uint64]domain.Migration, error) {
 	if ps.isClosed() {
 		if err := ps.Connect(ctx); err != nil {
 			return nil, err
@@ -319,7 +326,7 @@ func (ps *postgresStorage) UnLock(ctx context.Context) error {
 func (ps *postgresStorage) provideStorage(ctx context.Context) error {
 	ok, err := ps.checkStorage(ctx)
 	if err != nil {
-		return fmt.Errorf("%w: %s", errCheckStorage, err)
+		return fmt.Errorf("%w: %s", errCheckStorage, err.Error())
 	}
 	if !ok {
 		query := `
@@ -333,7 +340,7 @@ func (ps *postgresStorage) provideStorage(ctx context.Context) error {
 	CREATE INDEX IF NOT EXISTS idx_applied_version ON "public"."tmigration" USING btree(is_applied, version);
 `
 		if _, err := ps.conn.Exec(ctx, query); err != nil {
-			return fmt.Errorf("%w: %s", errCreateStorage, err)
+			return fmt.Errorf("%w: %s", errCreateStorage, err.Error())
 		}
 	}
 
@@ -362,7 +369,7 @@ func (ps *postgresStorage) provideMigration(ctx context.Context, migration domai
 `
 	_, err := ps.conn.Exec(ctx, query, migration.Version, migration.Name)
 	if err != nil {
-		return fmt.Errorf("%w: %s", errCreateMigrationRecord, err)
+		return fmt.Errorf("%w: %s", errCreateMigrationRecord, err.Error())
 	}
 
 	return nil

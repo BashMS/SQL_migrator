@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/BashMS/SQL_migrator/pkg/config"
+	"github.com/BashMS/SQL_migrator/pkg/config" //nolint:depguard
+	"github.com/jackc/pgx/v4"                   //nolint:depguard
 )
 
 const configPath = "/src/.bin/config.yml"
@@ -50,4 +50,3 @@ func ConnectDB() (*pgx.Conn, error) {
 
 	return conn, nil
 }
-

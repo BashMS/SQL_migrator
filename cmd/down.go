@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/BashMS/SQL_migrator/internal/converter"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
-	"github.com/BashMS/SQL_migrator/pkg/migrate"
-	"go.uber.org/zap"
+	"github.com/BashMS/SQL_migrator/internal/converter" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"         //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/migrate"        //nolint:depguard
+	"github.com/spf13/cobra"                            //nolint:depguard
+	"go.uber.org/zap"                                   //nolint:depguard
 )
 
 const argDownAll = "all"
@@ -27,7 +27,7 @@ If parallel migration start is allowed in the settings, then parallel migrations
 Attention, while the consistency of the database may suffer!`,
 	SilenceUsage: true,
 	Example:      "migrator down <version> [all] [flags] - where <version> is the version request",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		ctx, cancelFunc := context.WithCancel(context.Background())
 		runMigrate(ctx, cancelFunc, Down, args...)
 	},

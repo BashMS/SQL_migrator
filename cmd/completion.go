@@ -7,9 +7,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
-	"github.com/BashMS/SQL_migrator/pkg/logger"
+	"github.com/BashMS/SQL_migrator/pkg/logger" //nolint:depguard
+	"github.com/mitchellh/go-homedir"           //nolint:depguard
+	"github.com/spf13/cobra"                    //nolint:depguard
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	shellZsh  = "zsh"
 )
 
-//completionCmd команда завершения.
+// completionCmd команда завершения.
 var completionCmd = &cobra.Command{
 	Use:   "completion",
 	Short: "Generates completion scripts",
@@ -39,7 +39,7 @@ fi
 `,
 	SilenceUsage: true,
 	Example:      "migrator completion [bash|zsh]",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		zLogger, err := logger.New(&cfg)
 		if err != nil {
 			log.Fatal(err)

@@ -4,12 +4,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/BashMS/SQL_migrator/internal/loader"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
+	"github.com/BashMS/SQL_migrator/internal/loader" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/config"      //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"      //nolint:depguard
 )
 
-func GetMigrationByVersion(version uint64, IsApplied bool) domain.Migration {
+func GetMigrationByVersion(version uint64, isApplied bool) domain.Migration {
 	if version > 5 {
 		return domain.Migration{}
 	}
@@ -17,7 +17,7 @@ func GetMigrationByVersion(version uint64, IsApplied bool) domain.Migration {
 	return domain.Migration{
 		Version:   version,
 		Name:      GetRawMigrationByVersion(version).Name,
-		IsApplied: IsApplied,
+		IsApplied: isApplied,
 		UpdateAt:  time.Time{},
 	}
 }
@@ -28,7 +28,7 @@ func GetRawMigrationByVersion(version uint64) loader.RawMigration {
 
 func RawSQLMigrations(cfg *config.Config, direction bool) []loader.RawMigration {
 	if direction {
-		return []loader.RawMigration{
+		return []loader.RawMigration{ //nolint:dupl
 			{
 				Version:   1,
 				Name:      "testCreateFirstTable",
@@ -77,7 +77,7 @@ func RawSQLMigrations(cfg *config.Config, direction bool) []loader.RawMigration 
 		}
 	}
 
-	return []loader.RawMigration{
+	return []loader.RawMigration{ //nolint:dupl
 		{
 			Version:   5,
 			Name:      "testErrorMigration",
@@ -128,7 +128,7 @@ func RawSQLMigrations(cfg *config.Config, direction bool) []loader.RawMigration 
 
 func RawGoMigrations(cfg *config.Config, direction bool) []loader.RawMigration {
 	if direction {
-		return []loader.RawMigration{
+		return []loader.RawMigration{ //nolint:dupl
 			{
 				Version:  1,
 				Name:     "testCreateFirstTable",
@@ -167,7 +167,7 @@ func RawGoMigrations(cfg *config.Config, direction bool) []loader.RawMigration {
 		}
 	}
 
-	return []loader.RawMigration{
+	return []loader.RawMigration{ //nolint:dupl
 		{
 			Version:  5,
 			Name:     "testErrorMigration",

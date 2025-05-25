@@ -7,18 +7,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jackc/pgconn"
+	"github.com/BashMS/SQL_migrator/internal/command" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/core"    //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/loader"  //nolint:depguard
+	"github.com/BashMS/SQL_migrator/internal/storage" //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/config"       //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/domain"       //nolint:depguard
+	"github.com/BashMS/SQL_migrator/pkg/migrate"      //nolint:depguard
+	"github.com/BashMS/SQL_migrator/test"             //nolint:depguard
+	"github.com/jackc/pgconn"                         //nolint:depguard
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/BashMS/SQL_migrator/internal/command"
-	"github.com/BashMS/SQL_migrator/internal/core"
-	"github.com/BashMS/SQL_migrator/internal/loader"
-	"github.com/BashMS/SQL_migrator/internal/storage"
-	"github.com/BashMS/SQL_migrator/pkg/config"
-	"github.com/BashMS/SQL_migrator/pkg/domain"
-	"github.com/BashMS/SQL_migrator/pkg/migrate"
-	"github.com/BashMS/SQL_migrator/test"
-	"go.uber.org/zap/zaptest"
+	"go.uber.org/zap/zaptest" //nolint:depguard
 )
 
 const defaultMigratePath = "./../../test/data"
@@ -98,7 +98,7 @@ func TestNewMigrateCore_CreateGoTemplate(t *testing.T) {
 	cfg.Format = config.FormatGolang
 	migrateCore := core.NewMigrateCore(&mockStorage, &mockCommand, zLogger, cfg)
 
-	err := migrateCore.CreateMigrationFile("test empty migration", 4)
+	err := migrateCore.CreateMigrationFile("Test empty migration", 4)
 	assert.NoError(t, err)
 	newFile := filepath.Join(tmpDir, "4_test_empty_migration.go")
 	if !assert.FileExists(t, newFile) {
@@ -139,7 +139,7 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 		giveDirection         bool
 		expectedRawMigrations []loader.RawMigration
 	}{
-		//sql migration
+		// sql migration
 		{
 			name:                  "load all UP sql-file",
 			format:                config.FormatSQL,
@@ -161,7 +161,7 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 			giveDirection:         migrate.MigrationUp,
 			expectedRawMigrations: test.RawSQLMigrations(cfg, migrate.MigrationUp)[2:3],
 		},
-		//go migration
+		// go migration
 		{
 			name:                  "load all UP go-file",
 			format:                config.FormatGolang,
@@ -183,7 +183,10 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 	for _, tCase := range tCases {
 		t.Run(tCase.name, func(t *testing.T) {
 			cfg.Format = tCase.format
-			rawMigrations, err := migrateCore.LoadMigrations(context.Background(), tCase.giveRequestToVersion, tCase.giveDirection)
+			rawMigrations, err := migrateCore.LoadMigrations(
+				context.Background(),
+				tCase.giveRequestToVersion,
+				tCase.giveDirection)
 
 			assert.NoError(t, err)
 			assert.EqualValuesf(t, tCase.expectedRawMigrations, rawMigrations, "loaded migrations do not match")
@@ -191,7 +194,7 @@ func TestMigrateCore_LoadMigrations(t *testing.T) {
 	}
 }
 
-func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
+func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) { //nolint:gocognit
 	zLogger := zaptest.NewLogger(t)
 	cfg := createConfig(t, defaultMigratePath)
 	cfg.Format = config.FormatGolang
@@ -258,12 +261,29 @@ func TestMigrateCore_StartMigrate_FormatGolang(t *testing.T) {
 			}
 
 			mockCommand := command.MockCommand{}
-			mockCommand.On("Run", mock.Anything, "go", command.Args{"mod", "init", "go/migration"}, mock.Anything, mock.Anything).
+			mockCommand.On(
+				"Run",
+				mock.Anything,
+				"go",
+				command.Args{"mod", "init", "go/migration"},
+				mock.Anything,
+				mock.Anything).
 				Return(nil)
-			mockCommand.On("Run", mock.Anything, "go", command.Args{"mod", "tidy"}, mock.Anything, mock.Anything).
+			mockCommand.On(
+				"Run",
+				mock.Anything,
+				"go",
+				command.Args{"mod", "tidy"},
+				mock.Anything,
+				mock.Anything).
 				Return(nil)
 
-			mockCommand.On("RunWithGracefulShutdown", mock.Anything, "go", command.Args{"run", "./..."}, mock.Anything, mock.Anything).
+			mockCommand.On(
+				"RunWithGracefulShutdown",
+				mock.Anything,
+				"go",
+				command.Args{"run", "./..."}, mock.Anything,
+				mock.Anything).
 				Run(func(args mock.Arguments) {
 					if len(args) < 5 {
 						t.Fatal("the number of arguments in the command.Run method is less than 5")
@@ -383,10 +403,12 @@ func TestMigrateCore_StartMigrate_FormatSQL(t *testing.T) {
 }
 
 func assertCompareFiles(t *testing.T, originalFile, newFile string) {
+	t.Helper()
 	assert.EqualValues(t, fileGetContents(t, originalFile), fileGetContents(t, newFile))
 }
 
 func fileGetContents(t *testing.T, pathFile string) []byte {
+	t.Helper()
 	data, err := os.ReadFile(pathFile)
 	if !assert.NoError(t, err) {
 		return []byte{}
@@ -396,6 +418,7 @@ func fileGetContents(t *testing.T, pathFile string) []byte {
 }
 
 func createTempDir(t *testing.T) string {
+	t.Helper()
 	tmpPath, err := os.MkdirTemp(os.TempDir(), "test_migrator_*")
 	assert.NoError(t, err)
 
@@ -403,6 +426,7 @@ func createTempDir(t *testing.T) string {
 }
 
 func createConfig(t *testing.T, migratePath string) *config.Config {
+	t.Helper()
 	config := config.Config{
 		DSN:      "dsn",
 		Path:     migratePath,

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/spf13/viper"
+	"github.com/coreos/etcd/pkg/fileutil" //nolint:depguard
+	"github.com/spf13/viper"              //nolint:depguard
 )
 
 const (
@@ -15,8 +15,8 @@ const (
 
 	// LogLevelDebug - уровень логгирования.
 	LogLevelDebug = "debug"
-	LogLevelInfo = "info"
-	LogLevelWarn = "warn"
+	LogLevelInfo  = "info"
+	LogLevelWarn  = "warn"
 	LogLevelError = "error"
 	LogLevelFatal = "fatal"
 
@@ -44,12 +44,12 @@ var ErrConfigurationFileNotFound = errors.New("configuration file not found")
 
 // Config.
 type Config struct {
-	DSN            string
-	Path           string
-	Format         string
-	LogPath        string
-	LogLevel       string
-	viperConfig    *viper.Viper
+	DSN         string
+	Path        string
+	Format      string
+	LogPath     string
+	LogLevel    string
+	viperConfig *viper.Viper
 }
 
 // ReadConfigFromFile - читает файл конфигурации.
@@ -79,7 +79,7 @@ func (c *Config) ReadConfigWithEnv() bool {
 	return false
 }
 
-// ReadConfigFromDefaultPath - считывает файл конфигурации по пути по умолчанию `config/config.yml`
+// ReadConfigFromDefaultPath - считывает файл конфигурации по пути по умолчанию `config/config.yml`.
 func (c *Config) ReadConfigFromDefaultPath() bool {
 	dir, err := os.Getwd()
 	if err == nil {

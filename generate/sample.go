@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/iancoleman/strcase"
-	"github.com/BashMS/SQL_migrator/internal/template"
+	"github.com/BashMS/SQL_migrator/internal/template" //nolint:depguard
+	"github.com/iancoleman/strcase"                    //nolint:depguard
 )
 
 const (
@@ -18,9 +18,7 @@ const (
 	extTemplate = ".tpl"
 )
 
-var (
-	errNotFoundArguments = errors.New("not all arguments passed")
-)
+var errNotFoundArguments = errors.New("not all arguments passed")
 
 type _data struct {
 	SampleName string

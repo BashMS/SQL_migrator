@@ -8,7 +8,7 @@ var (
 	// ErrInvalidFormat - неверный формат миграции.
 	ErrInvalidFormat = errors.New("invalid migration format specified")
 
-    // ErrMigrationFileExists - файл миграции уже существует.
+	// ErrMigrationFileExists - файл миграции уже существует.
 	ErrMigrationFileExists = errors.New("migration file already exists")
 	// ErrCreateMigrationFile - не удалось создать файл миграции.
 	ErrCreateMigrationFile = errors.New("failed to create migration file")
@@ -30,6 +30,6 @@ it is possible that the application of migrations is running in parallel`)
 	ErrLoadMigrations = errors.New("failed to load migrations")
 	// ErrBuildProgramForMigrations - ошибка при сборке программы для миграций.
 	ErrBuildProgramForMigrations = errors.New("error while building the program for migrations")
-	//ErrStartingProgramForMigrations - ошибка при запуске программы для миграций.
+	// ErrStartingProgramForMigrations - ошибка при запуске программы для миграций.
 	ErrStartingProgramForMigrations = errors.New("an error occurred while starting the program for migrations")
 )
