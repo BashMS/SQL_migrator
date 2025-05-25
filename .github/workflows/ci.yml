@@ -20,7 +20,6 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.ref, 'migrator') }}
     steps:
       - name: Extract branch name
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
@@ -37,7 +36,6 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.57.2
-          working-directory: ${{ env.BRANCH }} 
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -67,12 +65,9 @@ jobs:
 
       - name: make lint
         run: make lint
-        working-directory: ${{ env.BRANCH }}
 
       - name: make build
         run: make build
-        working-directory: ${{ env.BRANCH }}
 
       - name: make test
         run: make test
-        working-directory: ${{ env.BRANCH }}
