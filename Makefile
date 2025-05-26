@@ -22,7 +22,7 @@ GO_TEST_COVERAGE_FILE_NAME ?= coverage.out
 
 all: help
 
-.PHONY: install build dependency generate config tools-lint-ci tools-lint tools-format tools-test
+.PHONY: install build dependency generate config tools-format tools-test
 ##@ Build
 # gcflags and asmflags (trimpath)- remove prefix from recorded source file paths
 # ldflags forward the version value to a variable Version
@@ -74,16 +74,6 @@ generate: ## File generation
 	$(call @print,Generate files,${COLOR_BLU})
 	@go generate ./...
 
-tools-lint-ci: ## Install tools for golangci-lint
-	@echo "Install golangci-lint"; \
-    GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
-
-tools-lint: ## Install tools for golint
-	@export GO111MODULE=off && \
-	export GOFLAGS="" && \
-	echo "Install golint"; \
-	go get -u -t golang.org/x/lint/golint
-
 tools-format: ## Install tools for format
 	@export GO111MODULE=off && \
 	export GOFLAGS="" && \
@@ -113,19 +103,6 @@ test-race:
 test-integration: ## Launch integration tests
 	$(call @print,Run integration tests,${COLOR_BLU})
 	@docker-compose down && docker-compose build && docker-compose up --force-recreate
-
-.PHONY: lint lint-format lint-style lint-ci lint-gosec
-##@ Linter
-lint: lint-format lint-ci lint-style ## Run code analysis (Check formatting, code style and check code with GolangCI-Lint )
-lint-format: ## Check formatting
-	$(call @print,Check formatting,${COLOR_BLU})
-	@export GO111MODULE="off" && \
-	export GOFLAGS="" && \
-	errors=$$(gofmt -l -d $$(go list -f "{{ .Dir }}" ./...)); \
-	if [[ "$${errors}" != "" ]]; then echo "$${errors}"; exit 1; fi
-lint-ci: ## Check code with GolangCI-Lint
-	$(call @print,Check code with GolangCI-Lint,${COLOR_BLU})
-	@golangci-lint run
 
 .PHONY: help
 help:
