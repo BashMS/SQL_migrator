@@ -234,8 +234,7 @@ func (l Loader) Len() int {
 
 // Swap меняет местами элементы с индексами i и j.
 func (l Loader) Swap(i, j int) {
-	l.hash[l.listMigrations[i].Version], l.hash[l.listMigrations[j].Version] =
-		l.hash[l.listMigrations[j].Version], l.hash[l.listMigrations[i].Version]
+	l.hash[l.listMigrations[i].Version], l.hash[l.listMigrations[j].Version] = l.hash[l.listMigrations[j].Version], l.hash[l.listMigrations[i].Version] //nolint:lll
 	l.listMigrations[i], l.listMigrations[j] = l.listMigrations[j], l.listMigrations[i]
 }
 
