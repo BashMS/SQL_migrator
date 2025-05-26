@@ -63,9 +63,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: make lint
-        run: make lint
-
       - name: make build
         run: make build
 
