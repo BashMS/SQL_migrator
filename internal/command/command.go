@@ -1,7 +1,5 @@
 package command
 
-// go:generate mockery --case=underscore --output=. --inpackage --all.
-
 import (
 	"context"
 	"fmt"

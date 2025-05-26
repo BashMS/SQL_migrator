@@ -1,7 +1,5 @@
 package storage
 
-//go:generate mockery --case=underscore --output=. --inpackage --all
-
 import (
 	"context"
 	"errors"
